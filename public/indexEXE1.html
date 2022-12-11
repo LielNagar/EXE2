@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<link href="./myCss.css" rel="stylesheet"></link>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script>
+    //CLASSES
+    class Ingredient {
+        constructor(_id, _name, _imgUrl, _calories) {
+            this.id = _id
+            this.name = _name
+            this.imgUrl = _imgUrl
+            this.calories = _calories
+            this.render = () => {
+                return (
+                    `<div class='IngredientDiv col-md-4'>
+                            <p>id: ${this.id}</p>
+                            <p>name: ${this.name}</p>
+                            <img src='${this.imgUrl}'></img>
+                            <p>calories: ${this.calories}</p>`
+
+                )
+            }
+        }
+    }
+
+    var i = 0;
+
+    class dishRecipe {
+        constructor(_name, _ingredients, _time, _cookingMethod, _img) {
+            this.name = _name
+            this.ingredients = _ingredients
+            this.time = _time
+            this.cookingMethod = _cookingMethod
+            this.img = _img
+            this.render = () => {
+                let dish = this
+                let html = '<div class= "dish col-sm-8 col-md-6 col-lg-3"><img src=' + this.img + '><p>name: ' + this.name + '</p><p>Cooking method: ' + this.cookingMethod +
+                    '</p><p>Total cooking time in minutes: ' + this.time + '</p><p>Total calories: ' + this.getCalories() + '</p><button class="button-30" onclick="showDishIngredients(' + i++ + ')">Show Ingredients</button></div>'
+                return (
+                    html
+                )
+            }
+        }
+        getCalories = () => {
+            let calories = 0
+            this.ingredients.map((value) => calories += parseInt(value.calories))
+            return calories;
+        }
+        getIngredients = () => {
+            this.ingredients.map((value) => console.log(value))
+        }
+    }
+
+    const cancel = () => {
+        $('#forms').empty()
+    }
+
+    const createRecipe = () => {
+        let recipes = JSON.parse(localStorage.getItem('recipes'))
+        let recipeDetails = $('.recipe')
+        const ingredients = JSON.parse(localStorage.getItem('ingredients'))
+        const ingredientsToSave = []
+        const checkboxes = $('.recipeCB')
+
+        if (!recipes) {
+            recipes = []
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    ingredientsToSave.push(ingredients[i])
+                }
+            }
+
+            const recipe = new dishRecipe(recipeDetails[0].value, ingredientsToSave, recipeDetails[2].value, recipeDetails[1].value, recipeDetails[3].value)
+            recipes.push(recipe)
+            localStorage.setItem('recipes', JSON.stringify(recipes))
+            Swal.fire(
+                'Good job!',
+                'The recipe was created',
+                'success'
+            )
+            setTimeout(() => {
+                window.location.href = "index.html"
+            }, 2000)
+
+        } else {
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    ingredientsToSave.push(ingredients[i])
+                }
+            }
+
+            const recipe = new dishRecipe(recipeDetails[0].value, ingredientsToSave, recipeDetails[2].value, recipeDetails[1].value, recipeDetails[3].value)
+            recipes.push(recipe)
+            console.log(recipe)
+            console.log(recipes)
+            localStorage.setItem('recipes', JSON.stringify(recipes))
+            Swal.fire(
+                'Good job!',
+                'The recipe was created',
+                'success'
+            )
+            setTimeout(() => {
+                window.location.href = "index.html"
+            }, 2000)
+        }
+    }
+
+    const createIngredient = () => {
+        const details = $('.ingredients')
+        let ingredients = JSON.parse(localStorage.getItem('ingredients'))
+
+        if (!ingredients) {
+            ingredients = []
+            const ingredient = new Ingredient(1, details[0].value, details[1].value, details[2].value)
+            ingredients.push(ingredient)
+            localStorage.setItem('ingredients', JSON.stringify(ingredients))
+            Swal.fire(
+                'Good job!',
+                'The ingredient was created',
+                'success'
+            )
+            setTimeout(() => {
+                window.location.href = "index.html"
+            }, 2000)
+
+        } else {
+            const length = ingredients.length
+            const ingredient = new Ingredient(length + 1, details[0].value, details[1].value, details[2].value)
+            ingredients.push(ingredient)
+            localStorage.setItem('ingredients', JSON.stringify(ingredients))
+            Swal.fire(
+                'Good job!',
+                'The ingredient was created',
+                'success'
+            )
+            setTimeout(() => {
+                window.location.href = "index.html"
+            }, 2000)
+        }
+    }
+
+    const showIngredients = () => {
+        let ingredients = JSON.parse(localStorage.getItem('ingredients'))
+        return (
+            ingredients.map((value) => {
+                value = new Ingredient(value.id, value.name, value.imgUrl, value.calories)
+                return (
+                    value.render() +
+                    `<br></br>
+                            <label>Add: </label>
+                            <input class= 'recipeCB' type= 'checkbox'></input>
+                        </div>`
+                )
+            })
+        )
+    }
+
+    const displayForm = (sender) => {
+        if (sender === 'newRecipe') {
+            $('#forms').empty()
+            $('#forms').append(
+                `<div class="row">
+                        <label>Recipe name:</label>
+                        <br></br>
+                        <input class= 'recipe' placeholder='Enter recipe name'></input>
+                        <br></br>
+                        <label>Recipe cooking method:</label>
+                        <br></br>
+                        <input class= 'recipe' placeholder='Enter cooking method'></input>
+                        <br></br>
+                        <label>Recipe cooking time:</label>
+                        <br></br>
+                        <input class= 'recipe' placeholder='Enter cooking time'></input>
+                        <br></br>
+                        <label>Recipe image:</label>
+                        <br></br>
+                        <input class= 'recipe' placeholder='Enter recipe image url'></input>
+                        <br></br>
+                        <h3>Choose ingredients:</h3>
+                        ${showIngredients()}
+                        <br></br>
+                        
+                    </div>
+                    
+                    <div>
+                        <button onclick="createRecipe()">Create</button>
+                        <button onclick="cancel()">Cancel</button>
+                    </div>`
+            )
+
+        } else {
+            $('#forms').empty()
+            $('#forms').append(
+                `<div>
+                        <label>Ingredient name:</label>
+                        <br></br>
+                        <input class= 'ingredients' placeholder='Enter ingredient name'></input>
+                        <br></br>
+                        <label>Ingredient image:</label>
+                        <br></br>
+                        <input class= 'ingredients' placeholder='Enter ingredient image url'></input>
+                        <br></br>
+                        <label>Ingredient calories:</label>
+                        <br></br>
+                        <input class= 'ingredients' placeholder='Enter ingredient calories'></input>
+                        <br></br>
+                        <button onclick="createIngredient()">Create</button>
+                        <button onclick="cancel()">Cancel</button>
+                    </div>`
+            )
+        }
+    }
+
+    const showDishIngredients = (id) => {
+        const recipes = JSON.parse(localStorage.getItem('recipes'))
+        const dish = recipes[id]
+        let html = ''
+        dish.ingredients.map((ingredient) => {
+            ingredient = new Ingredient(ingredient.id, ingredient.name, ingredient.imgUrl, ingredient.calories)
+            html += ingredient.render() + `</div>`
+        })
+        Swal.fire({
+            title: "<i>Dish Ingredients</i>",
+            html,
+            confirmButtonText: "<u>Got It!</u>",
+        });
+
+    }
+
+    const showDishes = () => {
+        const dishes = JSON.parse(localStorage.getItem('recipes'))
+        if (!dishes) return
+        let dishesDiv = $('#dishes')
+        dishes.map((dish) => {
+            dish = new dishRecipe(dish.name, dish.ingredients, dish.time, dish.cookingMethod, dish.img)
+            dishesDiv.append(
+                dish.render()
+            )
+        })
+    }
+</script>
+
+<head>
+    <title>My Page</title>
+</head>
+
+<body onload="showDishes()">
+
+    <div id='container'>
+        <h1>Dishes- Liel Nagar and Daniel Lev Ari</h1>
+        <button onclick="displayForm('newRecipe')">Add new recipe</button>
+        <button onclick="displayForm('newIngredient')">Add new ingredient</button>
+        <div id="forms">
+
+        </div>
+
+
+        <div id="dishes" class="row">
+
+        </div>
+    </div>
+</body>
+
+</html>
